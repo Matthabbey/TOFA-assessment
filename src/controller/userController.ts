@@ -71,59 +71,6 @@ export const Register = async (req: Request, res: Response) => {
   }
 };
 
-// export const verifyUser = async (req: Request, res: Response) => {
-//   try {
-//     const token = req.params.signature;
-//     const decode = await verifySignature(token);
-//     console.log(decode);
-
-//     //check if the user is a registered user
-//     const User = (await UserInstance.findOne({
-//       where: { email: decode.email },
-//     })) as unknown as UserAttributes; //we are getting email from the awaiting of verifySignature
-
-//     //Getting the otp sent to the user by email or sms by requesting the validaty of the token
-//     if (User) {
-//       const { otp } = req.body;
-//       console.log(typeof User.otp);
-//       if (User.otp === parseInt(otp) && User.otp_expiry >= new Date()) {
-//         // User.verified == true
-//         // const updatedUser = await User.update()
-//         const updatedUser = (await UserInstance.update(
-//           { verified: true },
-//           { where: { email: decode.email } }
-//         )) as unknown as UserAttributes;
-
-//         //Generate another signature for the validated or {updatedUser} verified account
-//         const signature = await GenerateSignature({
-//           id: updatedUser.id,
-//           email: updatedUser.email,
-//           verified: updatedUser.verified,
-//         });
-
-//         if (updatedUser) {
-//           const User = (await UserInstance.findOne({
-//             where: { email: decode.email },
-//           })) as unknown as UserAttributes;
-
-//           return res.status(200).json({
-//             message: "Your account has been succesfully verified",
-//             signature,
-//             verified: User.verified,
-//           });
-//         }
-//       }
-//     }
-//     return res.status(400).json({
-//       Error: "Invalid crediential or OTP is invalid",
-//     });
-//   } catch (error) {
-//     res.status(500).json({
-//       Error: "Internal server Error",
-//       route: "users/verify",
-//     });
-//   }
-// };
 
 export const Login = async (req: Request, res: Response) => {
   try {
@@ -241,9 +188,33 @@ export const CreateUserToken = async (req: Request, res: Response) => {
   }
   try {
     const token = await createPasswordToken();
-    await user.save();
-    const resetURL = `Hi, Please follow this link to reset your password.This link is valid till 10 minutes from now. <a href='http://localhost:4000/api/users/reset-password/${token}'>Please Click Here</a>`;
-    await mailSent(FromAdminMail, email, userSubject, resetURL);
+    const uuiduser = uuidv4();
+    const { otp, expiry } = GenerateOTP();
+
+    const User = (await UserInstance.findOne({
+      where: { email: email },
+    })) as unknown as UserAttributes;
+    if (!User) {
+      const createUser = await UserInstance.create({
+        id: uuiduser,
+        email,
+        password: "",
+        firstName: "",
+        lastName: "",
+        salt:'',
+        companyName: "address",
+        phone: '',
+        role: "user",
+        otp,
+        otp_expiry: expiry,
+      });
+      return res.status(201).json({
+        message: "user is created successfully",
+        createUser,
+      });
+    }
+    const createURL = `Hi, Please follow this link to reset your password.This link is valid till 10 minutes from now. <a href='http://localhost:4000/users/createlink/${token}'>Please Click Here</a>`;
+    await mailSent(FromAdminMail, email, userSubject, createURL);
     console.log(token);
     return res.status(200).json(token);
   } catch (error) {
