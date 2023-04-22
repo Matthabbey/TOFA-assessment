@@ -36,7 +36,7 @@ export const Register = async (req: Request, res: Response) => {
         otp,
         otp_expiry: expiry,
         verified: false,
-        role: "user",
+        role: "admin",
       });
 
       //Check if the user exist.
@@ -53,6 +53,7 @@ export const Register = async (req: Request, res: Response) => {
 
       return res.status(201).json({
         messsage: "User successfully created",
+        User,
         signature,
       });
     }
@@ -168,13 +169,13 @@ export const Login = async (req: Request, res: Response) => {
 export const CreateUser = async (req: JwtPayload, res: Response) => {
   try {
     const id = req.user.id;
-    // console.log(id)
+    console.log(id);
     const { phone, address, email, password } = req.body;
 
     // const {email, password, name, ownerName, pincode, address, phone} = req.body
     const salt = await GenerateSalt();
-    const vendorPassword = await GeneratePassword(password, salt);
-    const uuidVendor = uuidv4();
+    const userPassword = await GeneratePassword(password, salt);
+    const uuidUser = uuidv4();
 
     const { otp, expiry } = GenerateOTP();
 
@@ -183,21 +184,20 @@ export const CreateUser = async (req: JwtPayload, res: Response) => {
       where: { email: email },
     })) as unknown as UserAttributes;
 
-    if (User.email === email) {
-      return res.status(400).json({
-        message: "Email Already",
-      });
-    }
+    // if (User.email === email) {
+    //   return res.status(400).json({
+    //     message: "Email Already",
+    //   });
+    // }
 
     const Admin = (await UserInstance.findOne({
       where: { id: id },
     })) as unknown as UserAttributes;
-    console.log("I am here now");
 
     if (Admin.role === "admin") {
       if (!User) {
-        const createVendor = await UserInstance.create({
-          id,
+        const createUser = await UserInstance.create({
+          id: uuidUser,
           email,
           password,
           firstName: "",
@@ -212,7 +212,7 @@ export const CreateUser = async (req: JwtPayload, res: Response) => {
         });
         return res.status(201).json({
           message: "user is created successfully",
-          createVendor,
+          createUser,
         });
       }
       return res.status(201).json({
