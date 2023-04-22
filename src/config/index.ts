@@ -2,12 +2,20 @@ import { Sequelize } from 'sequelize'
 import dotenv from 'dotenv'
 dotenv.config()
 
-export const db = new Sequelize('app', '', '', {
+export const DATABASE = new Sequelize('mydatabase', '', '', {
     storage: './user.sqlite',
     dialect:'sqlite',
     logging: false
 })
-
+export async function connectToDatabase() {
+    try {
+      await DATABASE.sync();
+      console.log("DB connected successfully!!!!");
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  
 export const APP_SECRET = process.env.APP_SECRET as string
 export const AccountSID = process.env.AccountSID
 export const authToken = process.env.authToken

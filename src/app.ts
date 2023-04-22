@@ -6,18 +6,12 @@ import logger from "morgan";
 import usersRouter from "./routes/users";
 import indexRouter from "./routes";
 
-import { db } from "./config";
+import {connectToDatabase } from "./config";
 import dotenv from "dotenv";
 dotenv.config(); // You should have your dotenv file in where you create your server, it can either be in bin or app
 
 //Sequelize connection to dataBase
-db.sync()
-  .then(() => {
-    console.log("DB connected successfully!!!!");
-  })
-  .catch((error) => {
-    console.log(error);
-  });
+connectToDatabase()
 
 const app = express();
 

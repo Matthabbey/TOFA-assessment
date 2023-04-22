@@ -1,5 +1,5 @@
 import { DataTypes, Model } from "sequelize";
-import { db } from "../config";
+import { DATABASE } from "../config";
 
 export interface UserAttributes {
   id: string;
@@ -8,7 +8,7 @@ export interface UserAttributes {
   firstName: string;
   lastName: string;
   salt: string;
-  address: string;
+  companyName: string;
   phone: string;
   verified: boolean;
   role: string;
@@ -88,7 +88,7 @@ UserInstance.init(
         },
       },
     },
-    address: {
+    companyName: {
       type: DataTypes.STRING,
       allowNull: true,
     },
@@ -122,7 +122,7 @@ UserInstance.init(
     },
   },
   {
-    sequelize: db,
+    sequelize: DATABASE,
     tableName: "User",
   }
 );
