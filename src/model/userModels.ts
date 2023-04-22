@@ -10,7 +10,6 @@ export interface UserAttributes {
   salt: string;
   companyName: string;
   phone: string;
-  verified: boolean;
   role: string;
   otp: number;
   otp_expiry: Date;
@@ -101,18 +100,6 @@ UserInstance.init(
         },
         notEmpty: {
           msg: "Provide phone number",
-        },
-      },
-    },
-    verified: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      validate: {
-        notNull: {
-          msg: "User must be verified",
-        },
-        notEmpty: {
-          msg: "User not verified",
         },
       },
     },

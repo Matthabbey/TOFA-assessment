@@ -8,6 +8,8 @@ import {
     userSubject,
   } from "../config/index";
   import nodemailer from "nodemailer";
+import crypto from 'crypto'
+
   
   export const GenerateOTP = () => {
     const otp = Math.floor(1000 + Math.random() * 9000);
@@ -71,4 +73,10 @@ import {
       `;
     return response;
   };
-  
+
+  export const createPasswordToken = async () => {
+    const resettoken = crypto.randomBytes(32).toString('hex')
+    const passwordResetToken = crypto.createHash('sha256').update(resettoken).digest('hex');
+    const passwordResetExpires = Date.now() + 30 * 60 * 1000;
+    return resettoken
+  }
